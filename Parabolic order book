@@ -1,0 +1,80 @@
+use std::collections::BTreeMap;
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct Order {
+    price: f64,
+    quantity: f64,
+}
+
+struct OrderBook {
+    bids: BTreeMap<f64, f64>,
+    asks: BTreeMap<f64, f64>,
+}
+
+impl OrderBook {
+    fn new() -> Self {
+        Self {
+            bids: BTreeMap::new(),
+            asks: BTreeMap::new(),
+        }
+    }
+
+    fn add_order(&mut self, order: Order) {
+        match order.quantity.signum() {
+            1 => {
+                let entry = self.asks.entry(order.price).or_insert(0.0);
+                *entry += order.quantity;
+            }
+            -1 => {
+                let entry = self.bids.entry(order.price).or_insert(0.0);
+                *entry -= order.quantity;
+            }
+            _ => {}
+        }
+    }
+
+    fn remove_order(&mut self, order: Order) {
+        match order.quantity.signum() {
+            1 => {
+                if let Some(entry) = self.asks.get_mut(&order.price) {
+                    *entry -= order.quantity;
+                    if *entry == 0.0 {
+                        self.asks.remove(&order.price);
+                    }
+                }
+            }
+            -1 => {
+                if let Some(entry) = self.bids.get_mut(&order.price) {
+                    *entry += order.quantity;
+                    if *entry == 0.0 {
+                        self.bids.remove(&order.price);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn match_orders(&mut self) {
+        let mut matched_orders = Vec::new();
+        while let (Some((best_bid, _)), Some((best_ask, _))) = (self.bids.iter().next(), self.asks.iter().next()) {
+            if best_bid >= best_ask {
+                let bid = self.bids.get_mut(best_bid).unwrap();
+                let ask = self.asks.get_mut(best_ask).unwrap();
+                let quantity = bid.min(*ask);
+                matched_orders.push((best_bid, best_ask, quantity));
+                *bid -= quantity;
+                *ask -= quantity;
+                if *bid == 0.0 {
+                    self.bids.remove(best_bid);
+                }
+                if *ask == 0.0 {
+                    self.asks.remove(best_ask);
+                }
+            } else {
+                break;
+            }
+        }
+        matched_orders
+    }
+}
