@@ -20,7 +20,7 @@ Rust
 Installing
 
 A step by step series of examples that tell you how to get a development env running
-git clone https://github.com/yourusername/Parabolic-Exchange.git
+git clone https://github.com/mikky69/codespaces-blank
 cd Parabolic-Exchange
 
 And repeat
@@ -29,7 +29,3 @@ cargo run
 Built With
 Rust - The programming language used
 Web3.js - The JavaScript library for interacting with the Ethereum blockchain
-
-Contributing
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b2467940
-
